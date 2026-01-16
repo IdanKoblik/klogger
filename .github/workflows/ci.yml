@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -39,7 +39,7 @@ jobs:
         run: cmake --build build-coverage --target coverage || true
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: build-coverage/coverage-report
@@ -70,7 +70,7 @@ jobs:
           cp build-publish/src/libklogger.a klogger-pkg/
 
       - name: Upload library artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: klogger-${{ github.event.inputs.version }}
           path: klogger-pkg
