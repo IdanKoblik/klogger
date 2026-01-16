@@ -1,0 +1,47 @@
+klogger - C++ Thread-Safe logger lib
+========================================
+
+Overview:
+---------
+klogger is a simple, thread-safe singleton logger library for C++17.
+It supports logging to both stderr and a log file, multiple log levels,
+exception logging, and unknown exception handling. Designed for easy
+integration into any C++ project using CMake.
+
+CMake Integration:
+------------------
+There are two ways to integrate klogger into your project.
+
+1. Using `add_subdirectory`:
+
+   Project structure:
+
+       my_project/
+       ├── CMakeLists.txt
+       ├── src/main.cpp
+       └── external/klogger  (cloned or submodule)
+
+   Example CMakeLists.txt:
+
+       cmake_minimum_required(VERSION 3.20)
+       project(MyProject VERSION 1.0 LANGUAGES CXX)
+
+       # Add klogger as subdirectory
+       add_subdirectory(external/klogger)
+
+       add_executable(my_app src/main.cpp)
+       target_link_libraries(my_app PRIVATE klogger::klogger)
+       target_include_directories(my_app PRIVATE external/klogger/include)
+
+2. Using `find_package` (GitHub or installed system-wide):
+
+    include(FetchContent)
+    FetchContent_Declare(
+        klogger
+        GIT_REPOSITORY https://github.com/your-username/klogger.git
+        GIT_TAG 2026-b1
+    )
+
+    FetchContent_MakeAvailable(klogger)
+    add_executable(my_app src/main.cpp)
+    target_link_libraries(my_app PRIVATE klogger::klogger)

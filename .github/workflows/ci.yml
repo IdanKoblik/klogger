@@ -1,0 +1,76 @@
+name: klogger-ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        default: '2026-b1'
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    env:
+      CMAKE_BUILD_TYPE: Release
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake build-essential lcov
+
+      - name: Configure CMake
+        run: cmake -S . -B build-coverage -DKLOGGER_ENABLE_COVERAGE=ON -DKLOGGER_VERSION=${{ github.event.inputs.version || '2026-b1' }}
+
+      - name: Build
+        run: cmake --build build-coverage -- -j$(nproc)
+
+      - name: Run tests
+        run: ctest --test-dir build-coverage --output-on-failure
+
+      - name: Generate coverage report
+        run: cmake --build build-coverage --target coverage || true
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: build-coverage/coverage-report
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build-test
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake build-essential
+
+      - name: Configure CMake for dispatch
+        run: cmake -S . -B build-publish -DKLOGGER_VERSION=${{ github.event.inputs.version }}
+
+      - name: Build library
+        run: cmake --build build-publish --target klogger -- -j$(nproc)
+
+      - name: Package library
+        run: |
+          mkdir -p klogger-pkg/include/klogger
+          cp -r include/klogger/* klogger-pkg/include/klogger/
+          cp build-publish/src/libklogger.a klogger-pkg/
+
+      - name: Upload library artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: klogger-${{ github.event.inputs.version }}
+          path: klogger-pkg

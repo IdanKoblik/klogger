@@ -1,3 +1,7 @@
+# Local
+build/
+build-coverage/
+
 # Prerequisites
 *.d
 
