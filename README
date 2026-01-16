@@ -38,7 +38,7 @@ There are two ways to integrate klogger into your project.
     include(FetchContent)
     FetchContent_Declare(
         klogger
-        GIT_REPOSITORY https://github.com/your-username/klogger.git
+        GIT_REPOSITORY https://github.com/IdanKoblik/klogger.git
         GIT_TAG 2026-b1
     )
 
