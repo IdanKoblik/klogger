@@ -1,6 +1,7 @@
 # Local
 build/
 build-coverage/
+Testing/
 
 # Prerequisites
 *.d
