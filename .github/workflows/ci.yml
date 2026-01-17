@@ -1,5 +1,8 @@
 name: klogger-ci
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
@@ -7,9 +10,8 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
-      version:
+      VERSION:
         required: true
-        default: '2026-b1'
 
 jobs:
   build-test:
@@ -27,7 +29,10 @@ jobs:
           sudo apt install -y cmake build-essential lcov
 
       - name: Configure CMake
-        run: cmake -S . -B build-coverage -DKLOGGER_ENABLE_COVERAGE=ON -DKLOGGER_VERSION=${{ github.event.inputs.version || '2026-b1' }}
+        run: |
+          cmake -S . -B build-coverage \
+            -DKLOGGER_ENABLE_COVERAGE=ON \
+            -DKLOGGER_VERSION=${{ github.event.inputs.VERSION || '2026-b1' }}
 
       - name: Build
         run: cmake --build build-coverage -- -j$(nproc)
@@ -48,17 +53,20 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-test
     if: github.event_name == 'workflow_dispatch'
+
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y cmake build-essential
 
-      - name: Configure CMake for dispatch
-        run: cmake -S . -B build-publish -DKLOGGER_VERSION=${{ github.event.inputs.version }}
+      - name: Configure CMake
+        run: cmake -S . -B build-publish -DKLOGGER_VERSION=${{ inputs.VERSION }}
 
       - name: Build library
         run: cmake --build build-publish --target klogger -- -j$(nproc)
@@ -66,11 +74,14 @@ jobs:
       - name: Package library
         run: |
           mkdir -p klogger-pkg/include/klogger
-          cp -r include/klogger/* klogger-pkg/include/klogger/
-          cp build-publish/libklogger.a klogger-pkg/
 
-      - name: Upload library artifact
-        uses: actions/upload-artifact@v4
+          cp -r include/klogger/* klogger-pkg/include/klogger/
+          cp build-publish/libklogger.a klogger-pkg/klogger.a
+
+      - name: Upload
+        uses: IdanKoblik/Changelog@prod
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: klogger-${{ github.event.inputs.version }}
-          path: klogger-pkg
+          version: ${{ inputs.VERSION }}
+          assets: '["./klogger-pkg/klogger.a"]'
