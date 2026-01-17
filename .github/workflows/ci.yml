@@ -67,7 +67,7 @@ jobs:
         run: |
           mkdir -p klogger-pkg/include/klogger
           cp -r include/klogger/* klogger-pkg/include/klogger/
-          cp build-publish/src/libklogger.a klogger-pkg/
+          cp build-publish/libklogger.a klogger-pkg/
 
       - name: Upload library artifact
         uses: actions/upload-artifact@v4
