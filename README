@@ -8,6 +8,54 @@ It supports logging to both stderr and a log file, multiple log levels,
 exception logging, and unknown exception handling. Designed for easy
 integration into any C++ project using CMake.
 
+Basic Usage:
+------------
+Include the logger header:
+
+    #include <klogger/logger.h>
+
+Initialize the logger (optional but recommended):
+
+    klogger::Logger::instance().init("app.log");
+
+Log messages using macros:
+
+    LOG_DEBUG("Debug message");
+    LOG_INFO("Info message");
+    LOG_WARN("Warning message");
+    LOG_ERROR("Error message");
+    LOG_FATAL("Fatal error message");
+
+Log exceptions:
+
+    try {
+        throw std::runtime_error("Failure");
+    } catch (const std::exception& e) {
+        LOG_EXCEPTION(e);
+    }
+
+Handle unknown exceptions:
+
+    try {
+        throw 42;
+    } catch (...) {
+        LOG_UNKNOWN_EXCEPTION();
+    }
+
+Shutdown the logger (optional):
+
+    klogger::Logger::instance().shutdown();
+
+Log Output Format:
+------------------
+Each log entry is formatted as:
+
+    YYYY-MM-DD HH:MM:SS.mmm [LEVEL] [file:line] message
+
+Example:
+
+    2026-01-16 21:18:42.123 [INFO] [main.cpp:14] Application started
+
 CMake Integration:
 ------------------
 There are two ways to integrate klogger into your project.
